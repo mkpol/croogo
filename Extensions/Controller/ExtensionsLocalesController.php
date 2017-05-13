@@ -44,8 +44,9 @@ class ExtensionsLocalesController extends ExtensionsAppController {
 		$this->set('title_for_layout', __d('croogo', 'Locales'));
 
 		$locales = array();
-		$folder =& new Folder;
+		$folder = new Folder;
 		$paths = App::path('Locale');
+		$L10n = new L10n();
 		foreach ($paths as $path) {
 			$folder->path = $path;
 			$content = $folder->read();
@@ -53,15 +54,17 @@ class ExtensionsLocalesController extends ExtensionsAppController {
 				if (strstr($locale, '.') !== false) {
 					continue;
 				}
-				if (!file_exists($path . $locale . DS . 'LC_MESSAGES' . DS . 'croogo.po')) {
+				$filename = $path . $locale . DS . 'LC_MESSAGES' . DS . 'croogo.po';
+				if (!file_exists($filename)) {
 					continue;
 				}
 
 				$locales[] = $locale;
+				$languages[] = $L10n->catalog($locale);
 			}
 		}
 
-		$this->set(compact('content', 'locales'));
+		$this->set(compact('content', 'locales', 'languages'));
 	}
 
 /**
@@ -84,6 +87,21 @@ class ExtensionsLocalesController extends ExtensionsAppController {
 			$this->Session->setFlash(__d('croogo', 'Could not save Locale setting.'), 'flash', array('class' => 'error'));
 		}
 		return $this->redirect(array('action' => 'index'));
+	}
+
+/**
+ * Reset to default locale
+ */
+	public function admin_reset_locale() {
+		if ($this->request->is('post')) {
+			$result = $this->Setting->write('Site.locale', null);
+			if ($result) {
+				$this->Session->setFlash(sprintf(__d('croogo', "Locale setting has been cleared"), $locale), 'flash', array('class' => 'success'));
+			} else {
+				$this->Session->setFlash(__d('croogo', 'Could not clear Locale setting.'), 'flash', array('class' => 'error'));
+			}
+		}
+		return $this->redirect($this->referer());
 	}
 
 /**
@@ -184,7 +202,7 @@ class ExtensionsLocalesController extends ExtensionsAppController {
 			return $this->redirect(array('action' => 'index'));
 		}
 
-		$file =& new File($poFile, true);
+		$file = new File($poFile, true);
 		$content = $file->read();
 
 		if (!empty($this->request->data)) {
@@ -212,7 +230,7 @@ class ExtensionsLocalesController extends ExtensionsAppController {
 			return $this->redirect(array('action' => 'index'));
 		}
 
-		$file =& new File($poFile, true);
+		$file = new File($poFile, true);
 		if ($file->delete()) {
 			$this->Session->setFlash(__d('croogo', 'Locale deleted successfully.'), 'flash', array('class' => 'success'));
 		} else {

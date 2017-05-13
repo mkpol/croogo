@@ -59,7 +59,7 @@ class User extends UsersAppModel {
 				'message' => 'The username has already been taken.',
 				'last' => true,
 			),
-			'notEmpty' => array(
+			'notBlank' => array(
 				'rule' => 'notBlank',
 				'message' => 'This field cannot be left blank.',
 				'last' => true,
@@ -90,7 +90,7 @@ class User extends UsersAppModel {
 			'rule' => 'validIdentical',
 		),
 		'name' => array(
-			'notEmpty' => array(
+			'notBlank' => array(
 				'rule' => 'notBlank',
 				'message' => 'This field cannot be left blank.',
 				'last' => true,
